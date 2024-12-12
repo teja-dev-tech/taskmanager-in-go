@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"taskmaster/storage"
 )
 
 type Task struct {
@@ -15,18 +14,43 @@ type Task struct {
 
 var tasksFile = "data/tasks.json"
 
+func loadTasks() ([]Task, error) {
+	if _, err := os.Stat(tasksFile); os.IsNotExist(err) {
+		return []Task{}, nil
+	}
+
+	data, err := os.ReadFile(tasksFile)
+	if err != nil {
+		return nil, err
+	}
+
+	var tasks []Task
+	if err := json.Unmarshal(data, &tasks); err != nil {
+		return nil, err
+	}
+	return tasks, nil
+}
+
+func saveTasks(tasks []Task) error {
+	data, err := json.MarshalIndent(tasks, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(tasksFile, data, 0644)
+}
+
 func AddTask(text string) error {
-	tasks, err := storage.LoadTasks(tasksFile)
+	tasks, err := loadTasks()
 	if err != nil {
 		return err
 	}
 	newTask := Task{ID: fmt.Sprintf("%d", len(tasks)+1), Text: text}
 	tasks = append(tasks, newTask)
-	return storage.SaveTasks(tasksFile, tasks)
+	return saveTasks(tasks)
 }
 
 func ListTasks() error {
-	tasks, err := storage.LoadTasks(tasksFile)
+	tasks, err := loadTasks()
 	if err != nil {
 		return err
 	}
@@ -42,7 +66,7 @@ func ListTasks() error {
 }
 
 func DeleteTask(id string) error {
-	tasks, err := storage.LoadTasks(tasksFile)
+	tasks, err := loadTasks()
 	if err != nil {
 		return err
 	}
@@ -55,5 +79,5 @@ func DeleteTask(id string) error {
 	if len(tasks) == len(updatedTasks) {
 		return errors.New("task ID not found")
 	}
-	return storage.SaveTasks(tasksFile, updatedTasks)
+	return saveTasks(updatedTasks)
 }

@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1",
+    "text": "Buy groceries"
+  },
+  {
+    "id": "2",
+    "text": "Read a book"
+  },
+  {
+    "id": "3",
+    "text": "Write Go code"
+  },
+  {
+    "id": "4",
+    "text": "Learn Golang"
+  }
+]
